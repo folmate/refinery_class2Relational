@@ -25,6 +25,7 @@ include(
 		"store-query-interpreter",
 		"store-reasoning",
 		"store-reasoning-scope",
+		"domain-c2r",
 )
 
 for (project in rootProject.children) {
