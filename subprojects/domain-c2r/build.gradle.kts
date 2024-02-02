@@ -9,6 +9,18 @@ plugins {
 	id("tools.refinery.gradle.jmh")
 }
 
+repositories{
+	mavenCentral()
+
+	maven {
+		url = uri("https://maven.pkg.github.com/ATL-Research/*")
+		credentials {
+			username = (project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")).toString()
+			password = (project.findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")).toString()
+		}
+	}
+}
+
 dependencies {
 	api(project(":refinery-store"))
 	api(project(":refinery-store-query"))
@@ -16,8 +28,10 @@ dependencies {
 	api(project(":refinery-store-dse"))
 	api(project(":refinery-language-semantics"))
 	api(project(":refinery-generator"))
+	api(project(":refinery-store-dse-visualization"))
 	implementation(libs.eclipseCollections.api)
-	runtimeOnly(libs.eclipseCollections)
+	implementation("io.github.atlresearch.ttc2023:solutiondriver:0.5")
+    runtimeOnly(libs.eclipseCollections)
 }
 
 tasks{
