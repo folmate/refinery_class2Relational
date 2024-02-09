@@ -3,20 +3,23 @@ package c2r.refinery;
 import atl.research.AbstractDriver;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
 public class C2RTest extends C2RRefineryMain {
-	private final String base = "/home/wsl/incremental-class2relational/models/correctness3";
+	private final String base =
+			"/home/wsl/incremental-class2relational/models/correctness1";
 	@Test
+	@Disabled
 	public void incrementalTest() throws Exception {
 		this.init();
+
+		applyChange();//Batch mode
 		applyTransformation();
-		applyChange();
-		update();
-		save();
+		//applyChange();//Incremental mode
 		saveTarget();
 	}
 

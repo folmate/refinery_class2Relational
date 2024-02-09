@@ -9,6 +9,8 @@ import tools.refinery.store.model.ModelStore;
 import tools.refinery.store.query.ModelQueryAdapter;
 import tools.refinery.store.query.interpreter.QueryInterpreterAdapter;
 
+import java.io.IOException;
+
 import static c2r.refinery.C2RRules.*;
 import static c2r.refinery.C2RRules.setType;
 
@@ -28,25 +30,24 @@ public class C2RRefineryMain extends AbstractDriver {
 			solution.applyTransformation();
 			solution.applyChange();
 		}
-
-
-		//Refresh query engine and propagate
-		solution.update();
-		//Map back to resource
-		solution.save();
-
-		//save to file?
+		//save to file
 		solution.saveTarget();
 	}
-	public void run(){
-
+	@Override
+	protected void applyChange() {
+		super.applyChange();
+		update();
 	}
 	protected void update(){
-		model.getAdapter(ModelQueryAdapter.class).flushChanges();
-		model.getAdapter(PropagationAdapter.class).propagate();
+		if(model!=null){
+			model.getAdapter(ModelQueryAdapter.class).flushChanges();
+			model.getAdapter(PropagationAdapter.class).propagate();
+		}
 	}
-	protected void save(){
+	@Override
+	protected void saveTarget() throws IOException {
 		relationalmodel.toResource(getTarget());
+		super.saveTarget();
 	}
 	@Override
 	protected void applyTransformation() {
@@ -66,11 +67,11 @@ public class C2RRefineryMain extends AbstractDriver {
 				.with(ModificationAdapter.builder())
 				.with(PropagationAdapter.builder()
 						.rules(
-								unsetType,
+								//unsetType,
 								removeAttribute2Table,
 								removeAttribute2Column,
-								removeClass,
-								removeType,
+								//removeClass,
+								//removeType,
 								removeInt
 								,clean
 								,addInt
@@ -87,26 +88,15 @@ public class C2RRefineryMain extends AbstractDriver {
 		var store = storebuilder.build();
 		model = store.createEmptyModel();
 
-
 		var classmodel = new ClassDomain(model, getSource());
 		getSource().eAdapters().add(new ChangeImplementation(classmodel));
-
 		relationalmodel = new RelationalDomain(model);
-		new Trace2Domain(/*model*/);//new TraceDomain(model);
 
-		var engine = model.getAdapter(ModelQueryAdapter.class);
-		engine.getResultSet(nameQuery).addListener(relationalmodel.makeNameListener());
-		engine.flushChanges();
-	}
-	static C2RRefineryMain make(){
-		return new C2RRefineryMain();
-	}
-	@Override
-	protected void applyChange() {
-		super.applyChange();
-		/**
-		 * Unofficial change
-		 */
-		//TODO change to modify refinery model
+		//noinspection unchecked
+		model.getAdapter(ModelQueryAdapter.class)
+				.getResultSet(nameQuery)
+				.addListener(relationalmodel.makeNameListener());
+
+		update();
 	}
 }

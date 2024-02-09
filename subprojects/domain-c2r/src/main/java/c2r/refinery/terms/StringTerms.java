@@ -1,6 +1,7 @@
 package c2r.refinery.terms;
 
 import tools.refinery.store.query.term.ConstantTerm;
+import tools.refinery.store.query.term.DataVariable;
 import tools.refinery.store.query.term.Term;
 import tools.refinery.store.query.term.comparable.EqTerm;
 import tools.refinery.store.query.term.comparable.NotEqTerm;
@@ -15,4 +16,7 @@ public class StringTerms {
 		return new NotEqTerm<>(String.class, left, right);
 	}
 	public static Term<String> toFirstLower(Term<String> arg){ return new StringToFirstLowerTerm(arg);}
+	public static Term<String> format(String template, DataVariable<?>... data){
+		return new StringTerm(template,data);
+	}
 }

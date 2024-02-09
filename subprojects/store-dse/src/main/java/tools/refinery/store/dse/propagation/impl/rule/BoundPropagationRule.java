@@ -17,13 +17,10 @@ class BoundPropagationRule {
 	private final ResultSet<Boolean> resultSet;
 	private final BoundAction action;
 
-	//FIXME temporary
-	public final String name;
 	public BoundPropagationRule(Model model, Rule rule) {
 		this.model = model;
 		resultSet = model.getAdapter(ModelQueryAdapter.class).getResultSet(rule.getPrecondition());
 		action = rule.createAction(model);
-		name = rule.getName();
 	}
 
 	public PropagationResult fireAll() {

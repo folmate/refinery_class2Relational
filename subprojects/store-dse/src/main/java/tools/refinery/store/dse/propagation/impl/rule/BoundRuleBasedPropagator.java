@@ -21,7 +21,6 @@ public class BoundRuleBasedPropagator implements BoundPropagator {
 		queryEngine = model.getAdapter(ModelQueryAdapter.class);
 		boundRules = new BoundPropagationRule[propagationRules.size()];
 		for (int i = 0; i < boundRules.length; i++) {
-			System.out.println("Rule added: "+ propagationRules.get(i).getName());
 			boundRules[i] = new BoundPropagationRule(model, propagationRules.get(i));
 		}
 	}
@@ -33,7 +32,6 @@ public class BoundRuleBasedPropagator implements BoundPropagator {
 		// Use a classic for loop to avoid allocating an iterator.
 		//noinspection ForLoopReplaceableByForEach
 		for (int i = 0; i < boundRules.length; i++) {
-			System.out.println("Fire: "+ boundRules[i].name);
 			var lastResult = boundRules[i].fireAll();
 			result = result.andThen(lastResult);
 			if (result.isRejected()) {

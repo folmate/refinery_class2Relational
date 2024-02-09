@@ -72,10 +72,8 @@ public class RelationalDomain {
 		builder.symbols(relational_Named, relational_name, relational_Table, relational_Column, relational_Type, relational_col, relational_key, relational_type);
 	}
 
-	private final Model model;
 
 	public RelationalDomain(Model model){
-		this.model = model;
 		Named = model.getInterpretation(relational_Named);
 		name = model.getInterpretation(relational_name);
 		Table = model.getInterpretation(relational_Table);
@@ -89,9 +87,7 @@ public class RelationalDomain {
 	public void toResource(Resource resource){
 		var trace = new HashMap<Tuple, EObject>();
 		var factory = Relational_Factory.eINSTANCE;
-		/**
-		 * Make types
-		 */
+
 		var typeCursor = Type.getAll();
 		while (typeCursor.move()){
 			var type = factory.createType();
@@ -100,10 +96,7 @@ public class RelationalDomain {
 			trace.put(typeCursor.getKey(),type);
 			resource.getContents().add(type);
 		}
-		/**
-		 * Make Tables and Columns
-		 * Fixme add to resource
-		 */
+
 		var tableCursor = Table.getAll();
 		while(tableCursor.move()){
 			var table = factory.createTable();
@@ -169,7 +162,6 @@ public class RelationalDomain {
 					var types = type.getAll();
 					while(types.move()){
 						if(types.getKey().get(0)==colTuple.get(0)){
-							var t = Type.get(Tuple.of(types.getKey().get(1)));
 							b.append(", type=").append(name.get(Tuple.of(types.getKey().get(1))));
 						}
 					}

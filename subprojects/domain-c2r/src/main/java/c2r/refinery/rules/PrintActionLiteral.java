@@ -13,11 +13,6 @@ import java.util.List;
 public class PrintActionLiteral extends AbstractActionLiteral {
 	private List<NodeVariable> parameters;
 	private final String message;
-	public PrintActionLiteral(NodeVariable... datatype) {
-		super();
-		this.parameters = Arrays.stream(datatype).toList();
-		message = null;
-	}
 	public PrintActionLiteral(String message, NodeVariable... datatype) {
 		super();
 		this.parameters = Arrays.stream(datatype).toList();
@@ -36,7 +31,6 @@ public class PrintActionLiteral extends AbstractActionLiteral {
 
 	@Override
 	public BoundActionLiteral bindToModel(Model model) {
-
 		return tuple -> {
 			System.out.println("Action called with message=\""+message+"\"");
 			parameters.forEach(node -> {

@@ -12,7 +12,6 @@ import tools.refinery.store.model.Model;
 import tools.refinery.store.query.dnf.RelationalQuery;
 
 public class Rule {
-	private final String name;
 	private final RelationalQuery precondition;
 	private final Action action;
 
@@ -21,13 +20,8 @@ public class Rule {
 			throw new IllegalArgumentException("Expected an action clause with %d parameters, got %d instead"
 					.formatted(precondition.arity(), action.getArity()));
 		}
-		this.name = name;
 		this.precondition = precondition;
 		this.action = action;
-	}
-
-	public String getName() {
-		return name;
 	}
 
 	public RelationalQuery getPrecondition() {

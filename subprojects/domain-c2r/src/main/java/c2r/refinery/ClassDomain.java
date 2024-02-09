@@ -1,6 +1,8 @@
 package c2r.refinery;
 
 import atl.research.class_.DataType;
+import atl.research.class_.Class;
+import atl.research.class_.Attribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import tools.refinery.store.dse.modification.ModificationAdapter;
@@ -15,6 +17,8 @@ import tools.refinery.store.tuple.Tuple;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static tools.refinery.store.dse.modification.DanglingEdges.DELETE;
 
 public class ClassDomain {
 	public static final Symbol<String> class_name;
@@ -62,17 +66,8 @@ public class ClassDomain {
 		class_multivaluedView = new KeyOnlyView<>(class_multiValued);
 	}
 	private final Map<EObject,Tuple> trace = new HashMap<>();
+	private final ModificationAdapter mod;
 
-	public ClassDomain(Model model){
-		this.model = model;
-		name = model.getInterpretation(class_name);
-		Class = model.getInterpretation(class_Class);
-		DataType = model.getInterpretation(class_DataType);
-		Attribute = model.getInterpretation(class_Attribute);
-		att = model.getInterpretation(class_att);
-		type = model.getInterpretation(class_type);
-		multiValued = model.getInterpretation(class_multiValued);
-	}
 	public String toString() {
 		var b = new StringBuilder();
 		b.append("Class Domain\n");
@@ -85,7 +80,7 @@ public class ClassDomain {
 					.append("\"\n");
 		}
 
-		var classes = model.getInterpretation(class_Class).getAll();
+		var classes = Class.getAll();
 		while(classes.move()) {
 			b.append("\tClass").append(classes.getKey())
 					.append(", name=\"").append(name.get(classes.getKey()))
@@ -99,7 +94,6 @@ public class ClassDomain {
 					var types = type.getAll();
 					while(types.move()){
 						if(types.getKey().get(0)==att.get(0)){
-							var t = DataType.get(Tuple.of(types.getKey().get(1)));
 							b.append(", type=").append(name.get(Tuple.of(types.getKey().get(1))));
 						}
 					}
@@ -110,14 +104,14 @@ public class ClassDomain {
 		}
 		return b.toString();
 	}
-	private final Model model;
 
 	public Tuple tupleOf(Object source){
 		return trace.get((EObject) source);
 	}
 
 	public ClassDomain(Model model, Resource resource){
-		this.model = model;
+		mod = model.getAdapter(ModificationAdapter.class);
+
 		name = model.getInterpretation(class_name);
 		Class = model.getInterpretation(class_Class);
 		DataType = model.getInterpretation(class_DataType);
@@ -126,61 +120,72 @@ public class ClassDomain {
 		type = model.getInterpretation(class_type);
 		multiValued = model.getInterpretation(class_multiValued);
 
-		var mod = model.getAdapter(ModificationAdapter.class);
-
 		resource.getContents().forEach((EObject node) ->{
 			if(node instanceof atl.research.class_.Class cls){
-				var newclass = createClass();
-				trace.put(cls,newclass);
-				if(cls.getName()!=null)
-					name.put(newclass,cls.getName());
+				var newclass = createFrom(cls);
+				//if(cls.getName()!=null)
+				//	name.put(newclass,cls.getName());
 
 				cls.getAttr().forEach(attr -> {
-					var newattr = createAttributeOf(newclass);
-					trace.put(attr,newattr);
-					if(attr.getMultiValued() != null)
-						multiValued.put(newattr, attr.getMultiValued());
-					if(attr.getName() != null)
-						name.put(newattr,attr.getName());
+					var newattr = createFrom(attr, newclass);
+				//	trace.put(attr,newattr);
+					//if(attr.getMultiValued() != null)
+				//	multiValued.put(newattr, attr.getMultiValued());
+					//if(attr.getName() != null)
+				//	name.put(newattr,attr.getName());
 				});
 			}
 			if(node instanceof DataType dtype){
-				var newtype = createDataType();
-				trace.put(dtype,newtype);
-				if(dtype.getName()!=null)
-					name.put(newtype, dtype.getName());
+				var newtype = createFrom(dtype);
+				//if(dtype.getName()!=null)
+				//name.put(newtype, dtype.getName());
 			}
 		});
 
-		trace.forEach((src,tuple)->{
-			if(src instanceof atl.research.class_.Attribute attr){
-				type.put(Tuple.of(tuple.get(0),trace.get(attr.getType()).get(0)),true );
+		trace.forEach((src,attrid)->{
+			if(src instanceof Attribute attr){
+				var typeid = trace.get(attr.getType());
+				if(typeid!=null){
+					type.put(Tuple.of(attrid.get(0),typeid.get(0)),true );
+				}
 			}
 		});
 	}
 	public static void build(ModelStoreBuilder builder){
-		builder.symbols(/*OBJECTS,*/class_name, class_Class, class_DataType, class_Attribute, class_att, class_type,
+		builder.symbols(class_name, class_Class, class_DataType, class_Attribute, class_att, class_type,
 				class_multiValued);
 	}
 
-	private Tuple createNewObject(){
-		return model.getAdapter(ModificationAdapter.class).createObject();
-	}
-	public Tuple createClass(){
-		var id = createNewObject();
+	public Tuple createFrom(Class cls){
+		var id = mod.createObject();
 		Class.put(id,true);
+		trace.put(cls,id);
+		name.put(id,cls.getName());
 		return id;
 	}
 
-	public Tuple createDataType(){
-		var id = createNewObject();
+	public Tuple createFrom(DataType dtype){
+		var id = mod.createObject();
 		DataType.put(id,true);
+		trace.put(dtype,id);
+		name.put(id,dtype.getName());
 		return id;
 	}
-	public Tuple createAttributeOf(Tuple cls){
-		var id = createNewObject();
+	public Tuple createFrom(Attribute attr, Tuple cls){
+		var id = mod.createObject();
 		Attribute.put(id,true);
-		att.put(Tuple.of(cls.get(0),id.get(0)),true);
+		trace.put(attr,id);
+		name.put(id, attr.getName());
+		multiValued.put(id, attr.getMultiValued());
+		if(cls!=null) {
+			att.put(Tuple.of(cls.get(0), id.get(0)), true);
+		}
 		return id;
+	}
+
+	public void delete(Tuple old) {
+		if(old != null){
+			mod.deleteObject(old, DELETE);
+		}
 	}
 }

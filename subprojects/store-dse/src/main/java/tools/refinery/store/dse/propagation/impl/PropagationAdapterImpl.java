@@ -52,7 +52,6 @@ class PropagationAdapterImpl implements PropagationAdapter {
 	}
 
 	private PropagationResult propagateUntilFixedPoint(int propagatorIndex) {
-		System.out.println("BEGIN");
 		var propagator = boundPropagators[propagatorIndex];
 		PropagationResult result = PropagationResult.UNCHANGED;
 		PropagationResult lastResult;
