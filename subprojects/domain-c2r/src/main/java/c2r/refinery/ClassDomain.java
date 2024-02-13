@@ -123,22 +123,12 @@ public class ClassDomain {
 		resource.getContents().forEach((EObject node) ->{
 			if(node instanceof atl.research.class_.Class cls){
 				var newclass = createFrom(cls);
-				//if(cls.getName()!=null)
-				//	name.put(newclass,cls.getName());
-
-				cls.getAttr().forEach(attr -> {
-					var newattr = createFrom(attr, newclass);
-				//	trace.put(attr,newattr);
-					//if(attr.getMultiValued() != null)
-				//	multiValued.put(newattr, attr.getMultiValued());
-					//if(attr.getName() != null)
-				//	name.put(newattr,attr.getName());
-				});
+				cls.getAttr().forEach(attr ->
+					createFrom(attr, newclass)
+				);
 			}
 			if(node instanceof DataType dtype){
-				var newtype = createFrom(dtype);
-				//if(dtype.getName()!=null)
-				//name.put(newtype, dtype.getName());
+				createFrom(dtype);
 			}
 		});
 
