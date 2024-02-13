@@ -4,6 +4,7 @@
   SPDX-License-Identifier: EPL-2.0
 -->
 
+# This project is based on [Refinery](https://github.com/graphs4value/refinery). This "fork" will not be maintained.
 # Refinery
 
 [![Build](https://github.com/graphs4value/refinery/actions/workflows/build.yml/badge.svg)](https://github.com/graphs4value/refinery/actions/workflows/build.yml) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=graphs4value_refinery&metric=alert_status)](https://sonarcloud.io/dashboard?id=graphs4value_refinery) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=graphs4value_refinery&metric=coverage)](https://sonarcloud.io/dashboard?id=graphs4value_refinery)
